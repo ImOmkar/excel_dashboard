@@ -1,3 +1,6 @@
+{% load split_filter %}
+
+
 {% for message in messages %}
 <div class="inline-flex bg-blue-100  border-blue-500 text-blue-700 px-4 py-3 mb-1" role="alert">
     <p class="text-center">{{ message }}</p>
@@ -8,46 +11,64 @@
     <div
         class="flex w-full flex-col rounded-md bg-cover max-w-[95%] xl:max-w-[800px] w-[95%]">
         {% if files %}
-            <div class="bg-white rounded-lg border p-6 my-4">
-                <h2 class="text-2xl font-semibold mb-4">Merge Files: </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-3xl border dark:border dark:border-gray-700 p-6 my-4">
+                <h2 class="text-2xl dark:text-white font-semibold mb-4">Merge Files: </h2>
                 <form method="post">
                     {% csrf_token %}
+
                     {% for file in files %}
-                        <ul>
-                            <li class="mb-2">
+                        <div class="p-2 space-y-2">
+                            <!-- Checkbox for the file -->
+                            <div class="inline-flex items-center gap-2 p-3 rounded-3xl border dark:border dark:border-gray-700">
                                 <input type="checkbox" name="files" value="{{ file.id }}"> 
-                                {{ file.file_name }}
-                                <button hx-delete="{% url "delete_uploaded_file" file.id %}" hx-target="#files">🗑️</button>
-                            </li>
-                        </ul>
+                                <label class="dark:text-white">{{ file.file_name }}</label>
+                                <!-- Delete button -->
+                            <button hx-delete="{% url 'delete_uploaded_file' file.id %}" hx-target="#files">🗑️</button>
+                            </div>
+                            <!-- Multi-select box for columns -->
+                            <div class="inline-flex p-3 rounded-3xl border dark:border dark:border-gray-700">
+                                <select class="dark:bg-gray-800 dark:text-white" name="on_columns" id="on_columns" multiple>               
+                                    {% for column_name in file.column_names|split:',' %}
+                                        <option class="p-2 dark:border-2 dark:border-gray-800 dark:hover:border-2 dark:hover:border-gray-700 rounded-3xl text-center mx-2" value="{{ column_name }}">{{ column_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     {% endfor %}
+                    
                     <div class="flex justify-center gap-2 items-center">
-                        <select class="p-2.5" name="how" id="how">
-                            <option value="left">left</option>
-                            <option value="right">right</option>
-                            <option value="outer">outer</option>
-                            <option value="inner">inner</option>
-                        </select>
+                        <div class="px-4 py-2 dark:bg-gray-800 dark:text-white dark:border dark:border-gray-700 rounded-3xl">
+                            <select class="bg-gray-800" name="how" id="how">
+                                <option value="" selected>Select merge type</option>
+                                <option value="left">left</option>
+                                <option value="right">right</option>
+                                <option value="outer">outer</option>
+                                <option value="inner">inner</option>
+                            </select>
+                        </div>
+
                         
-                        <select class="p-2.5" name="how" id="how">
-                            {% for column in column_names_list %}
-                            <option value="{{ column }}">{{ column }}</option>
-                            {% endfor %}
-                        </select>
-                        
-                        <button hx-post="{% url "merge" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400" type="submit">
+                        <button hx-post="{% url "merge" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400 dark:text-white dark:border dark:border-gray-700 rounded-3xl" type="submit">
                             <span>Merge</span>
+                        </button>
+
+                        <button hx-post="{% url "concat" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400 dark:text-white dark:border dark:border-gray-700 rounded-3xl" type="submit">
+                            <span>Concat</span>
+                        </button>
+
+                        <button hx-post="{% url "columns_to_file" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400 dark:text-white dark:border dark:border-gray-700 rounded-3xl" type="submit">
+                            <span>Multi Columns to Sheet</span>
                         </button>
                     </div>
                 </form>
             </div>
         {% endif %}
 
-        <div class="bg-white rounded-lg border p-6">
-            <h2 class="text-2xl font-semibold mb-4">Processed Files: </h2>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl border dark:border dark:border-gray-700 p-6">
+            <h2 class="text-2xl font-semibold dark:text-white mb-4">Processed Files: </h2>
             {% for file in processed_files %}
                 <div class="mb-4">
-                    <p class="text-gray-700">Merge type: {{ file.merge_type }}</p>
+                    <p class="text-gray-700 dark:text-white">Merge type: {{ file.merge_type }}</p>
                     <div class="flex justify-center items-center">
                         <p class="p-2"><a href="{{ file.response_url }}" class="text-blue-500 hover:underline hover:underline-offset-4">💾 Download file</a></p>
                         <button hx-delete="{% url "delete_processed_file" file.id %}" hx-target="#files">🗑️</button>

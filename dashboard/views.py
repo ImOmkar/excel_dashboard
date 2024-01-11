@@ -5,6 +5,7 @@ from .models import Files, ProcessedFiles
 from django.contrib import messages
 import pandas as pd
 import os
+import ast
 import uuid
 from django.contrib.sites.models import Site
 # Create your views here.
@@ -116,6 +117,56 @@ def merge_files(request):
 
     return redirect('files')
 
+def concat_files(request):
+    if request.method == 'POST':
+        file_ids = request.POST.getlist('files')
+
+        selected_files = Files.objects.filter(id__in=file_ids)
+
+        if len(file_ids) >= 2:
+            dataframes = [pd.read_excel(selected_file.files.path) for selected_file in selected_files]            
+        
+            concatenated_df = pd.concat(dataframes, ignore_index=True)
+
+            new_excel_filename = f"processed_data_{uuid.uuid4()}.xlsx"
+            new_excel_file_path = os.path.join("media/processed_files/", new_excel_filename)
+
+            concatenated_df.to_excel(new_excel_file_path, index=False)
+
+            current_site = Site.objects.get_current()
+            domain_name = current_site.domain
+            final_url = f"http://{domain_name}:8000/{new_excel_file_path}"
+            ProcessedFiles.objects.create(merge_type='concat', response_url=final_url)
+
+            messages.success(request, "File has been processed and ready to download.")
+            return redirect('files')
+        else:
+            messages.success(request, 'Select atleast 2 files to perform concatination')
+    return redirect('files')
+
+def columns_to_file(request):
+    if request.method == 'POST':
+        columns = request.POST.getlist('on_columns')
+        print(columns)
+        if len(columns) >= 2:
+            concatenated_df = pd.DataFrame(columns=columns)
+
+            new_excel_filename = f"processed_data_{uuid.uuid4()}.xlsx"
+            new_excel_file_path = os.path.join("media/processed_files/", new_excel_filename)
+
+            concatenated_df.to_excel(new_excel_file_path, index=False)
+
+            current_site = Site.objects.get_current()
+            domain_name = current_site.domain
+            final_url = f"http://{domain_name}:8000/{new_excel_file_path}"
+            ProcessedFiles.objects.create(merge_type='multiple columns into one sheet', response_url=final_url)
+
+            messages.success(request, 'Success')
+            return redirect('files')
+        else:
+            messages.success(request, 'Please select atleast 2 columns to marge into one sheet')
+            return redirect('files')
+    return redirect('files')
 
 def processed_files(request):
     processed_files = ProcessedFiles.objects.all()
@@ -123,7 +174,6 @@ def processed_files(request):
         'processed_files': processed_files
     }
     return render(request, 'processed_files.html', context)
-
 
 def delete_processed_file(request, id):
     file = ProcessedFiles.objects.get(id=id)
