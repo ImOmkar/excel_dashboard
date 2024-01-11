@@ -1,0 +1,34 @@
+{% load widget_tweaks %}
+
+{% if form.files.errors %}
+<div class="pl-3">
+    <strong class="text-red-500  md:text-lg text-md font-mukta">{{ form.files.errors }}</strong>
+</div>
+{% endif %}
+
+<form 
+    class="my-4 bg-white p-4 rounded-lg border"
+    method="POST" 
+    action="{% url 'upload_file' %}" 
+    enctype="multipart/form-data">
+    {% csrf_token %}
+    <label class="block mb-2 text-sm font-medium text-gray-900" for="file_input">Upload file</label>
+    <div class="flex items-center gap-1">
+        {% render_field form.files class="block w-full px-2 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50  focus:outline-none " %}
+        <button type="submit" class="bg-white border border-gray-300 focus:border focus:border-gray-400 text-white px-4 py-2 rounded-md">🚀</button>
+    </div>
+    {% for field in form %}
+        {% if field.name == "files" %}
+            <ul>
+            {% for error in field.errors %}
+            <li>
+                <p class="text-md text-red-500">
+                    {{ error }}
+                </p>
+            </li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endfor %}
+    <p class="mt-1 text-sm text-gray-500" id="file_input_help">Only .Xlsx files.</p>
+</form>

@@ -1,0 +1,4 @@
+{% for file in processed_files %}
+    <p>Merge type = {{ file.merge_type }}</p>
+    <p class="p-2"><a href="{{ file.response_url }}">Download file</a></p>
+{% endfor %}

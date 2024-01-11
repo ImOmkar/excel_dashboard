@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+{% load widget_tweaks %}
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Excel Dashboard</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+        <p class="text-center text-4xl mt-4">Excel Dashboard</p>
+
+        {% for message in messages %}
+            <div class="text-center mt-4">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        <div class="flex flex-col justify-center items-center">
+            <div
+                class="flex w-full flex-col rounded-md bg-cover max-w-[95%] xl:max-w-[800px] w-[95%]">
+                <div class="text-center">{% include "upload_form.html" %}</div>
+            </div>
+        </div>
+
+        <div id="files" hx-get="{% url "files" %}" hx-trigger="load" class="text-center"></div>
+
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    </body>
+</html>
