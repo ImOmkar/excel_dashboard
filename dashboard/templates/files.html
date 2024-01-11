@@ -9,14 +9,15 @@
         class="flex w-full flex-col rounded-md bg-cover max-w-[95%] xl:max-w-[800px] w-[95%]">
         {% if files %}
             <div class="bg-white rounded-lg border p-6 my-4">
-                <h2 class="text-2xl font-semibold mb-4">Merge Files</h2>
+                <h2 class="text-2xl font-semibold mb-4">Merge Files: </h2>
                 <form method="post">
                     {% csrf_token %}
                     {% for file in files %}
                         <ul>
                             <li class="mb-2">
                                 <input type="checkbox" name="files" value="{{ file.id }}"> 
-                                {{ file }}
+                                {{ file.file_name }}
+                                <button hx-delete="{% url "delete_uploaded_file" file.id %}" hx-target="#files">🗑️</button>
                             </li>
                         </ul>
                     {% endfor %}
@@ -27,14 +28,15 @@
                             <option value="outer">outer</option>
                             <option value="inner">inner</option>
                         </select>
-                        <button hx-post="{% url "merge" %}" hx-target="#files" hx-indicator="#new-post" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400" type="submit">
+                        
+                        <select class="p-2.5" name="how" id="how">
+                            {% for column in column_names_list %}
+                            <option value="{{ column }}">{{ column }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                        <button hx-post="{% url "merge" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400" type="submit">
                             <span>Merge</span>
-                            <div id="new-post" class="htmx-indicator">
-                                <svg class="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-2" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </div>
                         </button>
                     </div>
                 </form>
@@ -42,14 +44,22 @@
         {% endif %}
 
         <div class="bg-white rounded-lg border p-6">
-            <h2 class="text-2xl font-semibold mb-4">Processed Files</h2>
+            <h2 class="text-2xl font-semibold mb-4">Processed Files: </h2>
             {% for file in processed_files %}
                 <div class="mb-4">
                     <p class="text-gray-700">Merge type: {{ file.merge_type }}</p>
-                    <p class="p-2"><a href="{{ file.response_url }}" class="text-blue-500 hover:underline hover:underline-offset-4">💾 Download file</a></p>
+                    <div class="flex justify-center items-center">
+                        <p class="p-2"><a href="{{ file.response_url }}" class="text-blue-500 hover:underline hover:underline-offset-4">💾 Download file</a></p>
+                        <button hx-delete="{% url "delete_processed_file" file.id %}" hx-target="#files">🗑️</button>
+                    </div>
                 </div>
             {% endfor %}
         </div>
     </div>
 </div>
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+    document.body.addEventListener("htmx:configRequest", (event) => {
+      event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
+    });
+  </script>
