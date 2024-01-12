@@ -7,6 +7,7 @@ import pandas as pd
 import os
 import ast
 import uuid
+from io import BytesIO
 from django.contrib.sites.models import Site
 # Create your views here.
 
@@ -25,7 +26,7 @@ def upload_file(request):
         for file in files:
             try:
                 df = pd.read_excel(file, nrows=5)  # Read first few rows to extract column names
-                column_names = ', '.join(df.columns)
+                column_names = ','.join(df.columns)
 
                 upload_file = Files.objects.create(
                     files=file,
@@ -50,80 +51,64 @@ def files(request):
     }
     return render(request, 'files.html', context)
 
-# def merge_files(request):
-#     if request.method == 'POST':
-#         file_id = request.POST.getlist('files')
-#         how = request.POST.get('how')
-#         print(how)
-#         if len(file_id) >= 2:
-#             files_1 = Files.objects.get(id=file_id[0])
-#             files_2 = Files.objects.get(id=file_id[1])
-#             df1 = pd.read_excel(files_1.files.path)  # Assuming the file field is named 'file'
-#             df2 = pd.read_excel(files_2.files.path)
-#             on_column = 'ID'
-#             if how:
-#                 merged_df = pd.merge(df1, df2, how=how, on=on_column)
-#                 print(merged_df)
-#                 new_excel_filename = f"processed_data_{uuid.uuid4()}.xlsx"
-#                 new_excel_file_path = os.path.join("media/processed_files/", new_excel_filename)
-
-#                 merged_df.to_excel(new_excel_file_path, index=False)
-#                 current_site = Site.objects.get_current()
-#                 domain_name = current_site.domain
-#                 final_url = f"http://{domain_name}:8000/{new_excel_file_path}"
-#                 ProcessedFiles.objects.create(merge_type=how, response_url=final_url)
-#                 # return HttpResponse(f'<a class="p-4" href="{final_url}">Download processed file</a>')
-#                 return redirect('files')
-#             else:
-#                 print('select what type of merge you want to perform. ')
-#         else:
-#             messages.success(request, "Please select atleast 2 files to perform merge operation") 
-#     return redirect('files')
-
 def merge_files(request):
     if request.method == 'POST':
+
         file_ids = request.POST.getlist('files')
+        column = request.POST.getlist('on_columns')
         how = request.POST.get('how')
+        print(how)
 
         if len(file_ids) >= 2:
-            files = [Files.objects.get(id=file_id) for file_id in file_ids]
-            dfs = [pd.read_excel(file.files.path) for file in files]
-            on_column = 'ID'  # Adjust if needed
+            selected_files = Files.objects.filter(id__in=file_ids)
 
-            if how:
-                merged_df = pd.concat(dfs, ignore_index=True)
-                if how != 'outer':  # Only merge if not outer join
-                    merged_df = merged_df.merge(dfs[0], how=how, on=on_column)
+            if len(column) > 0:
+                column_names_list = [file.column_names.split(',') for file in selected_files]
 
-                print(merged_df)
+                common_names = set(column_names_list[0]).intersection(*column_names_list[1:])
 
-                new_excel_filename = f"processed_data_{uuid.uuid4()}.xlsx"
-                new_excel_file_path = os.path.join("media/processed_files/", new_excel_filename)
+                # Convert common_names to a set of strings for comparison
+                common_names_set = {str(col) for col in common_names}
 
-                merged_df.to_excel(new_excel_file_path, index=False)
-
-                current_site = Site.objects.get_current()
-                domain_name = current_site.domain
-                final_url = f"http://{domain_name}:8000/{new_excel_file_path}"
-                ProcessedFiles.objects.create(merge_type=how, response_url=final_url)
+                # Convert column to a set of strings for comparison
+                column_set = set(str(col) for col in column)
                 
-                messages.success(request, "File has been processed and ready to download.")
-                # return HttpResponse(f'<a class="p-4" href="{final_url}">Download processed file</a>')
-                return redirect('files')
+                if column_set.issubset(common_names_set):
+
+                    dataframes = [pd.read_excel(selected_file.files.path) for selected_file in selected_files]
+
+                    if how:
+                        merged_df = pd.merge(pd.DataFrame(dataframes[0]), pd.DataFrame(dataframes[1]), how=how, on=column)
+                        print(merged_df)
+                        new_excel_filename = f"processed_data_{uuid.uuid4()}.xlsx"
+                        new_excel_file_path = os.path.join("media/processed_files/", new_excel_filename)
+
+                        merged_df.to_excel(new_excel_file_path, index=False)
+
+                        current_site = Site.objects.get_current()
+                        domain_name = current_site.domain
+                        final_url = f"http://{domain_name}:8000/{new_excel_file_path}"
+                        ProcessedFiles.objects.create(merge_type=how, response_url=final_url)
+                        
+                        messages.success(request, "File has been processed and ready to download.")
+                        return redirect('files')
+                    else:
+                        messages.success(request, "Please select the merge type")
+                else:
+                    messages.success(request, "Selected column is not common. if you want to merge anyway, use concat option.")
             else:
-                messages.success(request, "Select what type of merge you want to perform.")
+                messages.success(request, "Please select the column on which you want to merge two dataframes")
         else:
             messages.success(request, "Please select at least 2 files to perform merge operation")
-
     return redirect('files')
 
 def concat_files(request):
     if request.method == 'POST':
         file_ids = request.POST.getlist('files')
 
-        selected_files = Files.objects.filter(id__in=file_ids)
-
         if len(file_ids) >= 2:
+            selected_files = Files.objects.filter(id__in=file_ids)
+
             dataframes = [pd.read_excel(selected_file.files.path) for selected_file in selected_files]            
         
             concatenated_df = pd.concat(dataframes, ignore_index=True)
@@ -146,25 +131,88 @@ def concat_files(request):
 
 def columns_to_file(request):
     if request.method == 'POST':
+        file_ids = request.POST.getlist('files')
         columns = request.POST.getlist('on_columns')
-        print(columns)
-        if len(columns) >= 2:
-            concatenated_df = pd.DataFrame(columns=columns)
+        print(f"Selected Columns: {columns}")
+        if file_ids and len(columns) >= 1:
+            files = Files.objects.filter(id__in=file_ids)
 
+            data_frames = []
+
+            for file in files:
+                # Convert the binary data to a BytesIO object
+                file_content = BytesIO(file.files.read())  # Use the read() method to get the bytes-like object
+
+                # Load data from Excel file in the database
+                df = pd.read_excel(file_content)
+
+                # Get the indices of the selected columns in this file
+                col_indices = [df.columns.get_loc(col) for col in columns if col in df.columns]
+
+                # Use only the selected columns in this file
+                selected_df = df.iloc[:, col_indices]
+
+                data_frames.append(selected_df)
+
+            # Concatenate data frames horizontally
+            concatenated_df = pd.concat(data_frames, axis=1)
+
+            # Generate a unique filename
             new_excel_filename = f"processed_data_{uuid.uuid4()}.xlsx"
-            new_excel_file_path = os.path.join("media/processed_files/", new_excel_filename)
+            new_excel_file_path = os.path.join(
+                "media/processed_files/", new_excel_filename)
 
+            # Save the concatenated DataFrame to a new Excel file
             concatenated_df.to_excel(new_excel_file_path, index=False)
 
+            # Create a new ProcessedFiles instance
             current_site = Site.objects.get_current()
             domain_name = current_site.domain
             final_url = f"http://{domain_name}:8000/{new_excel_file_path}"
-            ProcessedFiles.objects.create(merge_type='multiple columns into one sheet', response_url=final_url)
+            ProcessedFiles.objects.create(
+                merge_type='selected columns from multiple files', response_url=final_url)
 
-            messages.success(request, 'Success')
+            messages.success(
+                request, 'File has been processed and ready to download.')
             return redirect('files')
         else:
-            messages.success(request, 'Please select atleast 2 columns to marge into one sheet')
+            messages.warning(
+                request, 'Please select at least 1 column and file to merge into one sheet')
+            return redirect('files')
+    return redirect('files')
+
+def common_and_discrepancies(request):
+    if request.method == 'POST':
+        file_ids = request.POST.getlist('files')
+        if len(file_ids) >= 2:
+            selected_files = Files.objects.filter(id__in=file_ids)
+
+            column_names_list = [file.column_names.split(',') for file in selected_files]
+
+            common_names = set(column_names_list[0]).intersection(*column_names_list)
+            print("Common Names: ", common_names)
+
+            uncommon_names = set.union(*[set(names) for names in column_names_list]) - common_names
+            print("UnCommon Names: ", uncommon_names)
+
+            messages.success(request, 'Success')
+
+            files = Files.objects.all()
+            column_names_list = [{'file_instance': file_instance, 'column_names': file_instance.column_names.split(',')} for file_instance in files]
+            processed_files = ProcessedFiles.objects.all()
+            context = {
+                'selected_files': selected_files,
+                'common_names': common_names,
+                'common_names_count': len(common_names),
+                'uncommon_names': uncommon_names,
+                'uncommon_names_count': len(uncommon_names),
+                'files': files,
+                'column_names_list': column_names_list,
+                'processed_files': processed_files
+            }
+            return render(request, 'files.html', context)
+        else:
+            messages.success(request, 'Please select atleast 2 columns to find the common and discrepancies in headers and values')
             return redirect('files')
     return redirect('files')
 

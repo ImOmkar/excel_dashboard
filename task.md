@@ -10,4 +10,4 @@ Merging Specific Columns from Multiple Excels: Develop functionality to select a
 
  
 
-Matching Columns from Different Excels: Implement a feature where users can match columns from different Excel files based on common values or headers. The dashboard should facilitate comparing these columns and highlight matches or discrepancies.
+Matching Columns from Different Excels: Implement a feature where users can match columns from different Excel files based on common values or headers. The dashboard should facilitate comparing these columns and highlight matches or discrepancies. DONE

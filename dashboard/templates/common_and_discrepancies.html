@@ -1,0 +1,29 @@
+<div class="max-w-2xl mx-auto mt-8 p-4 bg-white dark:bg-gray-800 rounded shadow">
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-4 dark:text-white">Selected Files: {{ selected_files.count }}</h2>
+        <ul class="list-disc pl-4">
+            {% for file in selected_files %}
+                <li class="dark:text-white">{{ file.file_name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-4 dark:text-white">Common Column Names: {{ common_names_count }}</h2>
+        <ul class="list-disc pl-4">
+            {% for columns in common_names %}
+                <li class="dark:text-white">{{ columns }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <h2 class="text-xl font-semibold mb-4 dark:text-white">Uncommon Column Names: {{ uncommon_names_count }}</h2>
+        <ul class="list-disc pl-4">
+            {% for columns in uncommon_names %}
+                <li class="dark:text-white">{{ columns }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

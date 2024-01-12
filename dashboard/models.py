@@ -8,7 +8,7 @@ class Files(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.files.name
+        return os.path.basename(self.files.name)
     
     def file_name(self):
         return os.path.basename(self.files.name)
