@@ -1,11 +1,31 @@
 {% load split_filter %}
 
 
-{% for message in messages %}
-<div class="inline-flex bg-blue-100  border-blue-500 text-blue-700 px-4 py-3 mb-1" role="alert">
-    <p class="text-center">{{ message }}</p>
-</div>
-{% endfor %}
+{% if messages %}
+    {% for message in messages %}
+        <div
+        x-cloak
+        x-show="showAlert"
+        x-data="{ showAlert: true }"
+        x-init="setTimeout(() => showAlert = false, 3000)"
+        role="alert" 
+        class="fixed bg-gray-800 text-white bottom-0 my-4 mx-auto flex justify-center items-center w-auto overflow-hidden rounded-lg shadow-md">
+        <div class="flex items-center justify-center w-12 p-2 bg-[#6364ff]">
+            <svg class="w-6 h-6 text-white fill-current" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 3.36667C10.8167 3.36667 3.3667 10.8167 3.3667 20C3.3667 29.1833 10.8167 36.6333 20 36.6333C29.1834 36.6333 36.6334 29.1833 36.6334 20C36.6334 10.8167 29.1834 3.36667 20 3.36667ZM19.1334 33.3333V22.9H13.3334L21.6667 6.66667V17.1H27.25L19.1334 33.3333Z" />
+            </svg>
+        </div>
+        
+        <div class="px-4 py-2 -mx-3"> 
+            <div class="mx-3">
+            <p class="text-sm text-gray-200">
+                {{ message }}
+            </p>
+            </div>
+        </div>
+        </div>
+    {% endfor %}
+{% endif %}
 
 <div class="flex flex-col justify-center items-center">        
     <div
@@ -17,15 +37,20 @@
                     {% csrf_token %}
 
                     {% for file in files %}
-                        <div class="p-2 space-y-2">
+                        <div class="p-2 space-y-2 border-t border-dashed border-gray-500 my-2">
+
                             <!-- Checkbox for the file -->
+                            <p class="dark:text-white text-lg">File name: </p>
                             <div class="inline-flex items-center gap-2 p-3 rounded-3xl border dark:border dark:border-gray-700">
                                 <input type="checkbox" name="files" value="{{ file.id }}"> 
                                 <label class="dark:text-white">{{ file.file_name }}</label>
                                 <!-- Delete button -->
-                            <button hx-delete="{% url 'delete_uploaded_file' file.id %}" hx-target="#files">🗑️</button>
+                            <button class="border-l border-gray-700 mx-1 px-2" hx-delete="{% url 'delete_uploaded_file' file.id %}" hx-target="#files">🗑️</button>
                             </div>
+                            <!-- checkbox for the file-->
+
                             <!-- Multi-select box for columns -->
+                            <p class="dark:text-white text-lg">Column names: </p>
                             <div class="inline-flex p-3 rounded-3xl border dark:border dark:border-gray-700">
                                 <select class="dark:bg-gray-800 dark:text-white" name="on_columns" id="on_columns" multiple>               
                                     {% for column_name in file.column_names|split:',' %}
@@ -33,10 +58,14 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <!-- Multi-select box for columns -->
+                            
                         </div>
                     {% endfor %}
+
+                    <hr class="dark:border-gray-700 my-6">
                     
-                    <div class="flex justify-center gap-2 items-center">
+                    <div class="flex justify-center gap-2 items-center my-2">
                         <div class="px-4 py-2 dark:bg-gray-800 dark:text-white dark:border dark:border-gray-700 rounded-3xl">
                             <select class="bg-gray-800" name="how" id="how">
                                 <option value="" selected>Select merge type</option>
@@ -46,12 +75,12 @@
                                 <option value="inner">inner</option>
                             </select>
                         </div>
-                        
-                        <!-- buttons to perform different operations -->
                         <button hx-post="{% url "merge" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400 dark:text-white dark:border dark:border-gray-700 rounded-3xl" type="submit">
                             <span>Merge</span>
                         </button>
-
+                    </div>
+                    <!-- buttons to perform different operations -->
+                    <div class="flex justify-center gap-2 my-2">
                         <button hx-post="{% url "concat" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400 dark:text-white dark:border dark:border-gray-700 rounded-3xl" type="submit">
                             <span>Concat</span>
                         </button>
@@ -59,13 +88,13 @@
                         <button hx-post="{% url "columns_to_file" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400 dark:text-white dark:border dark:border-gray-700 rounded-3xl" type="submit">
                             <span>Multi Columns to Sheet</span>
                         </button>
-                        
+                    </div>
+                    <div class="flex justify-center items-center  my-2">
                         <button hx-post="{% url "common_and_discrepancies" %}" hx-target="#files" class="flex justify-center items-center px-4 py-2 border borde-gray-300 focus:border focus:border-gray-400 dark:text-white dark:border dark:border-gray-700 rounded-3xl" type="submit">
                             <span>Common and Discrepancies</span>
                         </button>
-                        <!-- buttons to perform different operations -->
-
                     </div>
+                    <!-- buttons to perform different operations -->
                 </form>
             </div>
         {% endif %}

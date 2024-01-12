@@ -1,29 +1,123 @@
-<div class="max-w-2xl mx-auto mt-8 p-4 bg-white dark:bg-gray-800 rounded shadow">
-    <div class="mb-8">
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">Selected Files: {{ selected_files.count }}</h2>
-        <ul class="list-disc pl-4">
-            {% for file in selected_files %}
-                <li class="dark:text-white">{{ file.file_name }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    
-    <div class="mb-8">
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">Common Column Names: {{ common_names_count }}</h2>
-        <ul class="list-disc pl-4">
-            {% for columns in common_names %}
-                <li class="dark:text-white">{{ columns }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div>
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">Uncommon Column Names: {{ uncommon_names_count }}</h2>
-        <ul class="list-disc pl-4">
-            {% for columns in uncommon_names %}
-                <li class="dark:text-white">{{ columns }}</li>
-            {% endfor %}
-        </ul>
+<!-- selected files -->
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-2">
+        <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+            <div class="inline-block min-w-full shadow rounded-3xl overflow-hidden">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th
+                                class="px-5 py-3 border-b-2 border-gray-200 dark:text-white dark:bg-gray-700 dark:bg-gray-500 dark:border dark:border-gray-700 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Selected Files:
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in selected_files %}
+                        <tr>
+                            <td class="px-5 py-5 border-b text-center mx-auto dark:bg-gray-500 dark:border dark:border-gray-700 border-gray-200 bg-white text-sm">
+                                <div class="flex justify-center items-center">
+                                    <div class="ml-3">
+                                        <p class="inline-flex items-center gap-2 text-center whitespace-no-wrap">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M21 11V3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8"></path>
+                                                <line x1="8" y1="16" x2="16" y2="16"></line>
+                                            </svg>
+                                            {{ file.file_name }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+<!-- selected files -->
+
+<!-- common names -->
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-2">
+        <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+            <div class="inline-block min-w-full shadow rounded-3xl overflow-hidden">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th
+                                class="px-5 py-3 border-b-2 border-gray-200 dark:text-white dark:bg-gray-700 dark:bg-gray-500 dark:border dark:border-gray-700 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Common columns: {{ common_names_count}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for column in common_names %}
+                        <tr>
+                            <td class="px-5 py-5 border-b text-center mx-auto dark:bg-gray-500 dark:border dark:border-gray-700 border-gray-200 bg-white text-sm">
+                                <div class="flex justify-center items-center">
+                                    <div class="ml-3">
+                                        <p class="inline-flex items-center gap-2 text-center whitespace-no-wrap">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M21 11V3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8"></path>
+                                                <line x1="8" y1="16" x2="16" y2="16"></line>
+                                            </svg>
+                                            {{ column }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- common names -->
+
+<!-- uncommon names -->
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-2">
+        <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+            <div class="inline-block min-w-full shadow rounded-3xl overflow-hidden">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th
+                                class="px-5 py-3 border-b-2 border-gray-200 dark:text-white dark:bg-gray-700 dark:bg-gray-500 dark:border dark:border-gray-700 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Common columns: {{ uncommon_names_count }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for column in uncommon_names %}
+                        <tr>
+                            <td class="px-5 py-5 border-b text-center mx-auto dark:bg-gray-500 dark:border dark:border-gray-700 border-gray-200 bg-white text-sm">
+                                <div class="flex justify-center items-center">
+                                    <div class="ml-3">
+                                        <p class="inline-flex items-center gap-2 text-center whitespace-no-wrap">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M21 11V3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8"></path>
+                                                <line x1="8" y1="16" x2="16" y2="16"></line>
+                                            </svg>
+                                            {{ column }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- uncommon names -->
+

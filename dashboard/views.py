@@ -190,12 +190,9 @@ def common_and_discrepancies(request):
             column_names_list = [file.column_names.split(',') for file in selected_files]
 
             common_names = set(column_names_list[0]).intersection(*column_names_list)
-            print("Common Names: ", common_names)
-
             uncommon_names = set.union(*[set(names) for names in column_names_list]) - common_names
-            print("UnCommon Names: ", uncommon_names)
 
-            messages.success(request, 'Success')
+            messages.success(request, 'Common and Discrepancies Data is ready.')
 
             files = Files.objects.all()
             column_names_list = [{'file_instance': file_instance, 'column_names': file_instance.column_names.split(',')} for file_instance in files]
