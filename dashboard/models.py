@@ -13,6 +13,9 @@ class Files(models.Model):
     def file_name(self):
         return os.path.basename(self.files.name)
     
+    def file_size(self):
+        return self.files.size
+    
     
 class ProcessedFiles(models.Model):
     merge_type = models.CharField(max_length=50, null=True, blank=True)

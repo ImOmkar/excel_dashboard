@@ -25,16 +25,21 @@ def upload_file(request):
         files = request.FILES.getlist('files')
         for file in files:
             try:
-                df = pd.read_excel(file, nrows=5)  # Read first few rows to extract column names
-                column_names = ','.join(df.columns)
+                if not file.size > 5 * 1024 * 1024:
+                    df = pd.read_excel(file, nrows=5)  # Read first few rows to extract column names
+                    column_names = ','.join(df.columns)
 
-                upload_file = Files.objects.create(
-                    files=file,
-                    column_names=column_names
-                )
-                upload_file.save()
+                    upload_file = Files.objects.create(
+                        files=file,
+                        column_names=column_names
+                    )
+                    upload_file.save()
+                    messages.success(request, f"File has been uploaded")
+                else:
+                    messages.error(request, f"File size should not be more than 5 MB")
+
             except Exception as e:
-                messages.error(request, f"Error reading column names for {file.name}: {e}")
+                messages.error(request, f"Unsupported file: {file.name}")
 
         return redirect('home')
     context = {'form': form}

@@ -1,5 +1,5 @@
 {% load split_filter %}
-
+{% load humanize %}
 
 {% if messages %}
     {% for message in messages %}
@@ -31,7 +31,7 @@
     <div
         class="flex w-full flex-col rounded-md bg-cover max-w-[95%] xl:max-w-[800px] w-[95%]">
         {% if files %}
-            <div class="bg-white dark:bg-gray-800 rounded-3xl border dark:border dark:border-gray-700 p-6 my-4">
+            <div class="bg-white dark:bg-gray-900 rounded-3xl border dark:border dark:border-gray-700 p-6 my-2">
                 <h2 class="text-2xl dark:text-white font-semibold mb-4">Merge Files: </h2>
                 <form method="post">
                     {% csrf_token %}
@@ -43,16 +43,17 @@
                             <p class="dark:text-white text-lg">File name: </p>
                             <div class="inline-flex items-center gap-2 p-3 rounded-3xl border dark:border dark:border-gray-700">
                                 <input type="checkbox" name="files" value="{{ file.id }}"> 
-                                <label class="dark:text-white">{{ file.file_name }}</label>
+                                <label class="dark:text-white ">{{ file.file_name }}</label>
                                 <!-- Delete button -->
-                            <button class="border-l border-gray-700 mx-1 px-2" hx-delete="{% url 'delete_uploaded_file' file.id %}" hx-target="#files">🗑️</button>
+                                <button class="border-l border-gray-700 mx-1 px-2" hx-delete="{% url 'delete_uploaded_file' file.id %}" hx-target="#files">🗑️</button>
                             </div>
+                            <label class="dark:text-white">Size: {{ file.file_size|filesizeformat }}</label>
                             <!-- checkbox for the file-->
 
                             <!-- Multi-select box for columns -->
                             <p class="dark:text-white text-lg">Column names: </p>
                             <div class="inline-flex p-3 rounded-3xl border dark:border dark:border-gray-700">
-                                <select class="dark:bg-gray-800 dark:text-white" name="on_columns" id="on_columns" multiple>               
+                                <select class="dark:bg-gray-900 dark:text-white" name="on_columns" id="on_columns" multiple>               
                                     {% for column_name in file.column_names|split:',' %}
                                         <option class="p-2 dark:border-2 dark:border-gray-800 dark:hover:border-2 dark:hover:border-gray-700 rounded-3xl text-center mx-2" value="{{ column_name }}">{{ column_name }}</option>
                                     {% endfor %}
@@ -100,13 +101,14 @@
         {% endif %}
         
         {% if selected_files or common_names or uncommon_names %}
-        <div class="bg-white dark:bg-gray-800 rounded-3xl border dark:border dark:border-gray-700 p-6 mb-2">
+        <div class="bg-white dark:bg-gray-900 rounded-3xl border dark:border dark:border-gray-700 p-6 mb-2">
             <h2 class="text-2xl font-semibold dark:text-white mb-4">Common and Discrepancies Data: </h2>
             <div id="common_and_discrepancies">{% include "common_and_discrepancies.html" %}</div>
         </div>
         {% endif %}
 
-        <div class="bg-white dark:bg-gray-800 rounded-3xl border dark:border dark:border-gray-700 p-6">
+        {% if processed_files %}
+        <div class="bg-white dark:bg-gray-900 rounded-3xl border dark:border dark:border-gray-700 p-6">
             <h2 class="text-2xl font-semibold dark:text-white mb-4">Processed Files: </h2>
 
             {% for file in processed_files %}
@@ -119,6 +121,7 @@
                 </div>
             {% endfor %}
         </div>
+        {% endif %}
 
     </div>
 </div>

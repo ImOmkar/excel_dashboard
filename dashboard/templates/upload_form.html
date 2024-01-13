@@ -7,12 +7,12 @@
 {% endif %}
 
 <form 
-    class="my-4 bg-white dark:bg-gray-800 p-4 rounded-3xl border dark:border dark:border-gray-700"
+    class="mb-2 bg-white dark:bg-gray-900 p-4 rounded-3xl border dark:border dark:border-gray-700"
     method="POST" 
     action="{% url 'upload_file' %}" 
     enctype="multipart/form-data">
     {% csrf_token %}
-    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label>
+    <label class="block mb-2 text-sm font-medium text-left text-gray-900 dark:text-white" for="file_input">Upload file</label>
     <div class="flex items-center gap-1">
         {% render_field form.files class="block w-full px-2 py-2 dark:bg-gray-800 dark:border dark:text-white dark:border-gray-700 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50  focus:outline-none " %}
         <button type="submit" class="bg-white dark:bg-gray-800 border border-gray-300 focus:border focus:border-gray-400 text-white px-4 py-2 rounded-md dark:text-white dark:border dark:border-gray-700">🚀</button>
@@ -30,5 +30,5 @@
             </ul>
         {% endif %}
     {% endfor %}
-    <p class="mt-1 text-sm text-gray-500 dark:text-white" id="file_input_help">Only .Xlsx files.</p>
+    <p class="mt-1 text-sm text-gray-500 text-left dark:text-white" id="file_input_help">Formats Allowed: .Xls, .Xlsx - File Size: < 5 MB</p>
 </form>
