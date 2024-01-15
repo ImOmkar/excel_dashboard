@@ -47,7 +47,6 @@
                                 <!-- Delete button -->
                                 <button class="border-l border-gray-700 mx-1 px-2" hx-delete="{% url 'delete_uploaded_file' file.id %}" hx-target="#files">🗑️</button>
                             </div>
-                            <label class="dark:text-white">Size: {{ file.file_size|filesizeformat }}</label>
                             <!-- checkbox for the file-->
 
                             <!-- Multi-select box for columns -->
